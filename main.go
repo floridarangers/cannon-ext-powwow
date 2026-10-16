@@ -14,10 +14,18 @@ import (
 	"gorm.io/gorm"
 )
 
-const extensionName = "cannon-ext-powwow"
-const settingsTable = "powwow_settings"
-const mappingsTable = "powwow_button_routes"
-const managePermission = extensionName + ".manage"
+const (
+	extensionName        = "cannon-ext-powwow"
+	extensionTitle       = "Pow Wow"
+	extensionDescription = "Event dates, annual theme, countdown, and template button routing."
+	extensionVersion     = "1.2.0"
+	updateURLBase        = "https://github.com/rob121/cannon-ext-powwow/releases/download"
+	defaultAdminMenu     = "Pow Wow"
+
+	settingsTable    = "powwow_settings"
+	mappingsTable    = "powwow_button_routes"
+	managePermission = extensionName + ".manage"
+)
 
 //go:embed templates/*/*.html
 var templateFiles embed.FS
@@ -58,7 +66,14 @@ func main() {
 }
 
 func newServer(a *app) *extension.Server {
-	s := extension.New(extension.Info{Name: extensionName, Title: "Pow Wow", Description: "Event dates, annual theme, countdown, and template button routing.", Version: "1.1.0", AdminMenuName: "Pow Wow"})
+	s := extension.New(extension.Info{
+		Name:          extensionName,
+		Title:         extensionTitle,
+		Description:   extensionDescription,
+		Version:       extensionVersion,
+		UpdateURLBase: updateURLBase,
+		AdminMenuName: defaultAdminMenu,
+	})
 	s.EmbedTemplates(templateFiles, "templates")
 	s.EmbedHelp(helpFiles, "help")
 	s.RegisterPermissions([]extension.PermissionDef{{ID: "manage", DisplayName: "Manage Pow Wow", Description: "Edit event details and template button routes."}})
