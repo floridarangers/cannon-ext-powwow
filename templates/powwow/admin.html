@@ -1,0 +1,47 @@
+<style>
+.pw-admin{max-width:1250px}.pw-admin .pw-admin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.pw-admin .pw-admin-wide{grid-column:1/-1}.pw-admin .pw-admin-panel{padding:24px;margin-bottom:24px}.pw-admin label{display:block;font-weight:600;margin-bottom:7px}.pw-admin .pw-admin-help{font-size:.86rem;color:var(--admin-text-muted,#687382);margin:6px 0 0}.pw-admin textarea{min-height:110px}.pw-admin .pw-admin-submit{display:flex;gap:18px;align-items:center;margin-top:22px}.pw-admin .pw-button-row{border-top:1px solid var(--admin-border,#dce1e7);padding:20px 0;display:grid;grid-template-columns:minmax(220px,1fr) minmax(240px,1fr);gap:24px}.pw-admin .pw-button-row:first-child{border-top:0}.pw-admin .pw-button-source{font-size:.8rem;color:var(--admin-text-muted,#687382);overflow-wrap:anywhere}.pw-admin .pw-button-group{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--admin-text-muted,#687382)}.pw-admin .pw-button-fallback{display:block;font-size:.8rem;overflow-wrap:anywhere;margin-top:8px}.pw-admin .pw-route-warning{color:#9a4d05;font-size:.85rem}.pw-admin input,.pw-admin select,.pw-admin textarea{width:100%}.pw-admin .pw-countdown-preview{margin-top:18px;padding:12px 16px;border-radius:6px;background:var(--admin-bg-secondary,#f3f6fa)}@media(max-width:760px){.pw-admin .pw-admin-grid,.pw-admin .pw-button-row{grid-template-columns:1fr}.pw-admin .pw-admin-wide{grid-column:auto}.pw-admin .pw-admin-panel{padding:18px}}
+</style>
+<div class="pw-admin">
+  <h1>Pow Wow</h1><p>Manage the event details and connect your template’s buttons to Cannon routes.</p>
+  {{if .Notice}}<div class="admin-alert admin-alert-success" role="status">{{.Notice}}</div>{{end}}
+  {{if .Error}}<div class="admin-alert admin-alert-danger" role="alert">{{.Error}}</div>{{end}}
+  <section class="admin-data-card pw-admin-panel" aria-labelledby="pw-event-heading">
+    <h2 class="admin-data-card-title" id="pw-event-heading">Event settings</h2>
+    <p class="pw-admin-help">Dates are optional. Empty dates are omitted. The countdown is hidden after Pow Wow day.</p>
+    <form method="post" action="{{.AdminURL}}" data-turbo="false">
+      {{.CSRFField}}<input type="hidden" name="action" value="settings">
+      <div class="pw-admin-grid" style="margin-top:20px">
+        <div class="pw-admin-wide"><label for="pw-theme-name">Theme name</label><input class="admin-form-control" id="pw-theme-name" name="theme_name" maxlength="180" value="{{.Settings.ThemeName}}"><p class="pw-admin-help">Replaces the homepage’s main heading. Leave blank to keep the template’s default.</p></div>
+        <div class="pw-admin-wide"><label for="pw-theme-description">Theme description</label><textarea class="admin-form-control" id="pw-theme-description" name="theme_description" maxlength="2000" rows="4">{{.Settings.ThemeDescription}}</textarea><p class="pw-admin-help">Replaces the introduction beneath the homepage heading. Plain text; line breaks are preserved.</p></div>
+        <div><label for="pw-workday">Pow Wow Workday</label><input class="admin-form-control" id="pw-workday" type="date" name="workday" value="{{.Settings.Workday}}"></div>
+        <div><label for="pw-early">Early Registration Deadline Date</label><input class="admin-form-control" id="pw-early" type="date" name="early_registration_deadline" value="{{.Settings.EarlyRegistrationDeadline}}"></div>
+        <div><label for="pw-close">Online Registration Close Date</label><input class="admin-form-control" id="pw-close" type="date" name="online_registration_close" value="{{.Settings.OnlineRegistrationClose}}"></div>
+        <div><label for="pw-date">Pow Wow Date</label><input class="admin-form-control" id="pw-date" type="date" name="powwow_date" value="{{.Settings.PowWowDate}}"></div>
+        <div class="pw-admin-wide"><label for="pw-timezone">Event timezone</label><input class="admin-form-control" id="pw-timezone" name="timezone" value="{{.Settings.Timezone}}" placeholder="America/New_York" required><p class="pw-admin-help">The countdown changes at midnight in this timezone, including daylight saving changes.</p></div>
+      </div>
+      <div class="pw-countdown-preview"><strong>Countdown preview:</strong> {{.Countdown}}</div>
+      <div class="pw-admin-submit"><button type="submit" class="btn-admin-primary">Save event settings</button></div>
+    </form>
+  </section>
+  <section class="admin-data-card pw-admin-panel" aria-labelledby="pw-buttons-heading">
+    <h2 class="admin-data-card-title" id="pw-buttons-heading">Template button routes</h2>
+    <p class="pw-admin-help">Buttons are discovered from the <strong>pw</strong> template. Choose an active route, or leave unmapped to render <code>#</code>. Repeated labels are listed separately by location. Menus configured in Cannon remain managed under Menus.</p>
+    {{if .DiscoveryWarning}}<div class="admin-alert admin-alert-warning" role="alert">{{.DiscoveryWarning}}</div>{{else}}
+    {{if .Buttons}}
+    <form method="post" action="{{.AdminURL}}" data-turbo="false">
+      {{.CSRFField}}<input type="hidden" name="action" value="mappings">
+      <div>{{range .Buttons}}<div class="pw-button-row">
+        <div><span class="pw-button-group">{{.Group}}</span><label for="route-{{.ID}}">{{.Label}}</label><div class="pw-button-source">{{.Source}} · {{.ID}}</div><span class="pw-button-fallback">Original: <code>{{.Fallback}}</code></span></div>
+        <div><select class="admin-form-control" id="route-{{.ID}}" name="route.{{.ID}}">
+          <option value="0"{{if eq .RouteID 0}} selected{{end}}>No link (#)</option>
+          {{if .Warning}}<option value="{{.RouteID}}" selected disabled>Unavailable route — choose a replacement</option>{{end}}
+          {{$selected:=.RouteID}}{{range $.Routes}}<option value="{{.RouteID}}"{{if eq .RouteID $selected}} selected{{end}}>{{.Name}} — {{.Path}}</option>{{end}}
+        </select>{{if .Warning}}<p class="pw-route-warning">{{.Warning}}</p>{{end}}</div>
+      </div>{{end}}</div>
+      <p class="pw-admin-help">Only active, concrete public routes are listed. Create a specific route first for destinations that currently use wildcard or regular-expression routes.</p>
+      <div class="pw-admin-submit"><button type="submit" class="btn-admin-primary">Save button routes</button><span class="pw-admin-help">{{len .Buttons}} template links</span></div>
+    </form>
+    {{else}}<p>No annotated buttons were found. Install the companion pw template or add <code>data-pw-link</code> and <code>data-pw-label</code> to your links.</p>{{end}}{{end}}
+  </section>
+  <section class="admin-data-card pw-admin-panel"><h2 class="admin-data-card-title">Place your blocks</h2><p>In Cannon’s Blocks area, select <strong>Pow Wow → Important Date</strong> and place it in <code>event-details</code>. Select <strong>Pow Wow → Countdown</strong> and place it in <code>countdown</code> for the homepage hero, or in <code>sidebar</code> for an inner page.</p><p class="pw-admin-help">Use the plain block template and leave the placement title blank to avoid an empty wrapper after the event. Assign public visibility if everyone should see the block.</p></section>
+</div>

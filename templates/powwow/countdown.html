@@ -1,0 +1,4 @@
+<div class="pw-countdown" role="status">
+  <strong class="pw-countdown-number">{{.Days}}</strong>
+  <span>{{if eq .Days 0}}days — Pow Wow is today!{{else if eq .Days 1}}day until Pow Wow{{else}}days until Pow Wow{{end}}{{if .ThemeName}}<small>{{.ThemeName}}</small>{{end}}</span>
+</div>
