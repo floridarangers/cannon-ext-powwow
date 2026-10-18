@@ -18,8 +18,8 @@ const (
 	extensionName        = "cannon-ext-powwow"
 	extensionTitle       = "Pow Wow"
 	extensionDescription = "Event dates, annual theme, countdown, and template button routing."
-	extensionVersion     = "1.2.0"
-	updateURLBase        = "https://github.com/rob121/cannon-ext-powwow/releases/download"
+	extensionVersion     = "1.2.1"
+	updateURLBase        = "https://github.com/floridarangers/cannon-ext-powwow/releases/download"
 	defaultAdminMenu     = "Pow Wow"
 
 	settingsTable    = "powwow_settings"
